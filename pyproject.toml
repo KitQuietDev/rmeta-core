@@ -26,6 +26,9 @@ dependencies = [
     "aiofiles>=24.1.0",
 ]
 
+[project.optional-dependencies]
+test = ["pytest>=8.0"]
+
 [project.urls]
 rMeta = "https://github.com/KitQuietDev/rMeta"
 rMetaCLI = "https://github.com/KitQuietDev/rMetaCLI"

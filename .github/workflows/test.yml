@@ -1,4 +1,4 @@
-name: Smoke Test
+name: Tests
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  smoke-test:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -20,32 +20,8 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install package
-        run: pip install --no-cache-dir -e .
+      - name: Install package with test dependencies
+        run: pip install --no-cache-dir -e .[test]
 
-      - name: Handler registry loads
-        run: |
-          python -c "
-          from rmeta_core.handlers import handler_map
-          expected = {'pdf', 'docx', 'xlsx', 'jpg', 'jpeg', 'heic', 'txt', 'csv'}
-          missing = expected - set(handler_map.keys())
-          assert not missing, f'missing handlers for: {missing}'
-          print('handler registry OK:', sorted(handler_map.keys()))
-          "
-
-      - name: Real scrub against a sample file
-        run: |
-          python -c "
-          import asyncio
-          from rmeta_core.handlers import get_handler_for_extension
-
-          with open('sample.txt', 'w') as f:
-              f.write('Contact: jane@example.com, SSN 123-45-6789\n')
-
-          handler = get_handler_for_extension('txt')
-          asyncio.run(handler['scrub']('sample.txt'))
-          messages = asyncio.run(handler['get_additional_messages']('sample.txt'))
-          print('scrub messages:', messages)
-          assert any('PII detected' in m for m in messages), 'expected PII scanner to flag the sample data'
-          print('scrub pipeline OK')
-          "
+      - name: Run tests
+        run: pytest tests/ -v

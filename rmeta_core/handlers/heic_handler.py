@@ -16,6 +16,8 @@ from PIL import Image
 import pillow_heif
 from rmeta_core.utils.pii_scanner import scan_text_for_pii
 
+pillow_heif.register_heif_opener()
+
 logger = logging.getLogger(__name__)
 __all__ = ["scrub", "get_additional_messages"]
 
@@ -35,7 +37,7 @@ async def scrub(file_path: str) -> None:
     if ext not in SUPPORTED_EXTENSIONS:
         raise ValueError(f"Unsupported file type: {ext}")
 
-    async def scrub_heic():
+    def scrub_heic():
         heif_file = pillow_heif.read_heif(file_path)
         if heif_file.data is None:
             raise ValueError(f"HEIC file data is missing: {file_path}")
